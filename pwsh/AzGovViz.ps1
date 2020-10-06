@@ -1988,7 +1988,7 @@ $script:html += @"
 <button type="button" class="collapsible" id="table_$mgId">$levelSpacing<img class="imgMg" src="https://www.azadvertizer.net/azgovvizv4/icon/Icon-general-11-Management-Groups.svg"> <span class="valignMiddle">$mgNameAndOrId $subInfo</span></button>
 <div class="content">
 <table class="bottomrow">
-<tr><td class="detailstd"><p><a href="#hierarchy_$mgId"><i class="fa fa-eye" aria-hidden="true"></i> <i>Highlight Management Group in hierarchy tree</i></a></p></td></tr>
+<tr><td class="detailstd"><p><a href="#hierarchy_$mgId"></a></p></td></tr>
 <tr><td class="detailstd"><p>Management Group Name: <b>$mgName</b></p></td></tr>
 <tr><td class="detailstd"><p>Management Group Id: <b>$mgId</b></p></td></tr>
 <tr><td class="detailstd"><p>Management Group Path: $mgPath</p></td></tr>
@@ -2040,7 +2040,7 @@ $script:html += @"
 
 $script:html += @"
 <table class="subTable">
-<tr><td class="detailstd"><p><a href="#hierarchySub_$mgChild"><i class="fa fa-eye" aria-hidden="true"></i> <i>Highlight Subscription in hierarchy tree</i></a></p></td></tr>
+<tr><td class="detailstd"><p><a href="#hierarchySub_$mgChild"></a></p></td></tr>
 <tr><td class="detailstd"><p>Subscription Name: <b>$($subEntry.subscription)</b></p></td></tr>
 <tr><td class="detailstd"><p>Subscription Id: <b>$($subEntry.subscriptionId)</b></p></td></tr>
 <tr><td class="detailstd"><p>Subscription Path: $subPath</p></td></tr>
@@ -6857,7 +6857,7 @@ $htmlSUMMARYSubs += @"
 <td>$($summarySubscription.SubscriptionState)</td>
 <td>$($summarySubscription.SubscriptionQuotaId)</td>
 <td>$(($subscriptionTagsArray | sort-object) -join "$CsvDelimiterOpposite ")</td>
-<td><a href="#hierarchySub_$($summarySubscription.MgId)"><i class="fa fa-eye" aria-hidden="true"></i></a> $subPath</td>
+<td><a href="#hierarchySub_$($summarySubscription.MgId)"></a> $subPath</td>
 </tr>
 "@
     }
@@ -6946,7 +6946,7 @@ $htmlSUMMARYOutOfScopeSubscriptions += @"
 <td>$($outOfScopeSubscription.SubscriptionName)</td>
 <td>$($outOfScopeSubscription.SubscriptionId)</td>
 <td>$($outOfScopeSubscription.outOfScopeReason)</td>
-<td><a href="#hierarchy_$($outOfScopeSubscription.ManagementGroupId)"><i class="fa fa-eye" aria-hidden="true"></i></a> $($outOfScopeSubscription.ManagementGroupName) ($($outOfScopeSubscription.ManagementGroupId))</td>
+<td><a href="#hierarchy_$($outOfScopeSubscription.ManagementGroupId)"></a> $($outOfScopeSubscription.ManagementGroupName) ($($outOfScopeSubscription.ManagementGroupId))</td>
 </tr>
 "@ 
     }

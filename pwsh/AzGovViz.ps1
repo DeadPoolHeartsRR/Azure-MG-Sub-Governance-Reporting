@@ -1221,7 +1221,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                                 $SubscriptionResourceLocks = "n/a"
                             }
                             else{
-                                if (($subResourceLocksResult.value | measure-object).count -gt 0) {
+                                if (($subResourceLocksResult.Count | measure-object).count -gt 0) {
                                     #$SubscriptionResourceLocks = "$($subResourceLocksResult)" 
                                     foreach ($resourcelock in $subResourceLocksResult) {
 

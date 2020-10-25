@@ -2279,7 +2279,7 @@ $htmlScopeInsights += @"
 if (-not $NoResourceLocks){
     #ResourceLocks
     #region ScopeInsightsResourceLocksDetailed
-    if (($htResourceLocksAll.Value | Measure-Object).count -gt 0){
+    if (($htResourceLocksAll.Keys | Measure-Object).count -gt 0){
         $tfCount = ($arrayResourceLocksAll | Measure-Object).Count
         $tableId = "DetailsTable_ResourceLocks_$($subscriptionId -replace '-','_')"
         

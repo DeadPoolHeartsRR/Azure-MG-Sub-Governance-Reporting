@@ -1224,10 +1224,10 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                                     #$SubscriptionResourceLocks = "$($subResourceLocksResult)" 
                                     foreach ($resourcelock in $subResourceLocksResult) {
 
-                                        if (-not $($htCacheDefinitions).resourcelock[$resourcelock.LockId]) {
+                                        <#if (-not $($htCacheDefinitions).resourcelock[$resourcelock.LockId]) {
                                             $($htCacheDefinitions).resourcelock.$($resourcelock.LockId) = @{ }
                                             $($htCacheDefinitions).resourcelock.$($resourcelock.LockId) = $resourcelock
-                                        }  
+                                        } #> 
         
                                         $resourcelockName = $resourcelock.Name
                                         $resourcelockId = $resourcelock.LockId

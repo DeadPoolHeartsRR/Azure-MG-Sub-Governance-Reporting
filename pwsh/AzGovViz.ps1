@@ -1216,10 +1216,10 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                             }
                             until($result -ne "tryAgain")
 
-                            $resourcelockName = $resourcelock.Name
-                                        $resourcelockId = $resourcelock.LockId
-                                        $resourcelockResourceName = $resourcelock.ResourceName
-                                        $resourcelockProperties = $resourcelock.Properties
+                            $resourcelockName = $subResourceLocksResult.Name
+                                        $resourcelockId = $subResourceLocksResult.LockId
+                                        $resourcelockResourceName = $subResourceLocksResult.ResourceName
+                                        $resourcelockProperties = $subResourceLocksResult.Properties
                                         $resourcelockScoped = "/subscriptions/$childMgSubId"
                                         addRowToTable `
                                             -hierarchyLevel $hierarchyLevel `

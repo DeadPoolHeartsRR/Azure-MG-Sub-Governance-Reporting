@@ -1222,7 +1222,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                             else{
                                 if (($subResourceLocksResult.value | measure-object).count -gt 0) {
                                     #$SubscriptionResourceLocks = "$($subResourceLocksResult)" 
-                                    foreach ($resourcelock in $subResourceLocksResult.value) {
+                                    foreach ($resourcelock in $subResourceLocksResult) {
 
                                         if (-not $($htCacheDefinitions).resourcelock[$resourcelock.LockId]) {
                                             $($htCacheDefinitions).resourcelock.$($resoucelock.LockId) = @{ }

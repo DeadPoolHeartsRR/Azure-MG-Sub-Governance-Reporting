@@ -1216,6 +1216,32 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                             }
                             until($result -ne "tryAgain")
 
+                            $resourcelockName = $resourcelock.Name
+                                        $resourcelockId = $resourcelock.LockId
+                                        $resourcelockResourceName = $resourcelock.ResourceName
+                                        $resourcelockProperties = $resourcelock.Properties
+                                        $resourcelockScoped = "/subscriptions/$childMgSubId"
+                                        addRowToTable `
+                                            -hierarchyLevel $hierarchyLevel `
+                                            -mgName $getMg.DisplayName `
+                                            -mgId $getMg.Name `
+                                            -mgParentId $mgParentId `
+                                            -mgParentName $mgParentName `
+                                            -Subscription $childMg.DisplayName `
+                                            -SubscriptionId $childMgSubId `
+                                            -SubscriptionQuotaId $subscriptionQuotaId `
+                                            -SubscriptionState $subscriptionState `
+                                            -SubscriptionASCSecureScore $subscriptionASCSecureScore `
+                                            -SubscriptionResourceLocks $SubscriptionResourceLocks `
+                                            -SubscriptionTags $subscriptionTags `
+                                            -SubscriptionTagsLimit $LimitTagsSubscription `
+                                            -SubscriptionTagsCount $SubscriptionTagsCount `
+                                            -resourcelockName $resourcelockName `
+                                            -resourcelockId $resourcelockId `
+                                            -resourcelockResourceName $resourcelockResourceName `
+                                            -resourcelockProperties $resourcelockProperties `
+                                            -resourcelockScoped $resourcelockScoped
+
                             if ($result -ne "letscheck"){
                                 Write-Host " CustomDataCollection: Subscription Id: $childMgSubId Getting Resource Locks error: '$result' -> skipping Resource Locks for this subscription"
                                 $SubscriptionResourceLocks = "n/a"

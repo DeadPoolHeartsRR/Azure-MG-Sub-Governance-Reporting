@@ -30,6 +30,9 @@
 .PARAMETER NoASCSecureScore
     default is to query all Subscriptions for Azure Security Center Secure Score. As the API is in preview you may want to disable it.
 
+.PARAMETER NoResourceLocks
+    default is to query all Subscriptions for Resource Locks. As the API is in preview you may want to disable it.    
+
 .PARAMETER NoResourceProvidersDetailed
     default is to output all ResourceProvider states for all Subscriptions. In large Tenants this can become time consuming.
 
@@ -61,6 +64,9 @@
     Define if ASC SecureScore should be queried for Subscriptions
     PS C:\>.\AzGovViz.ps1 -ManagementGroupId <your-Management-Group-Id> -NoASCSecureScore
 
+    Define if Resource Locks should be queried for Subscriptions
+    PS C:\>.\AzGovViz.ps1 -ManagementGroupId <your-Management-Group-Id> -NoResourceLocks
+
     Define if a detailed summary on Resource Provider states per Subscription should be created in the TenantSummary section
     PS C:\>.\AzGovViz.ps1 -ManagementGroupId <your-Management-Group-Id> -NoResourceProvidersDetailed
 
@@ -91,6 +97,7 @@ Param
     [switch]$DoNotShowRoleAssignmentsUserData,
     [switch]$HierarchyMapOnly,
     [switch]$NoASCSecureScore,
+    [switch]$NoResourceLocks,
     [switch]$NoResourceProvidersDetailed,
     [switch]$AzureDevOpsWikiAsCode,
     [int]$LimitCriticalPercentage = 80,
@@ -317,6 +324,7 @@ $table.columns.add((New-Object system.Data.DataColumn SubscriptionId, ([string])
 $table.columns.add((New-Object system.Data.DataColumn SubscriptionQuotaId, ([string])))
 $table.columns.add((New-Object system.Data.DataColumn SubscriptionState, ([string])))
 $table.columns.add((New-Object system.Data.DataColumn SubscriptionASCSecureScore, ([string])))
+$table.columns.add((New-Object system.Data.DataColumn SubscriptionResourceLocks, ([string])))
 $table.columns.add((New-Object system.Data.DataColumn SubscriptionTags, ([string])))
 $table.columns.add((New-Object system.Data.DataColumn SubscriptionTagsLimit, ([int])))
 $table.columns.add((New-Object system.Data.DataColumn SubscriptionTagsCount, ([int])))
@@ -383,7 +391,8 @@ function addRowToTable() {
         $SubscriptionId, 
         $SubscriptionQuotaId, 
         $SubscriptionState, 
-        $SubscriptionASCSecureScore, 
+        $SubscriptionASCSecureScore,
+        $SubscriptionResourceLocks, 
         $SubscriptionTags, 
         $SubscriptionTagsLimit = 0, 
         $SubscriptionTagsCount = 0, 
@@ -448,6 +457,7 @@ function addRowToTable() {
     $row.SubscriptionQuotaId = $SubscriptionQuotaId
     $row.SubscriptionState = $SubscriptionState
     $row.SubscriptionASCSecureScore = $SubscriptionASCSecureScore
+    $row.SubscriptionResourceLocks = $SubscriptionResourceLocks
     $row.SubscriptionTags = $SubscriptionTags
     $row.SubscriptionTagsLimit = $SubscriptionTagsLimit
     $row.SubscriptionTagsCount = $SubscriptionTagsCount
@@ -1180,6 +1190,48 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                             $subscriptionASCSecureScore = "excluded"
                         }
 
+                        #SubscriptionResourceLocks
+                        if (-not $NoResourceLocks){
+                            $uriSubResourceLocks = "$(($htAzureEnvironmentRelatedUrls).($checkContext.Environment.Name).ResourceManagerUrl)subscriptions/$childMgSubId/providers/Microsoft.Authorization/locks?api-version=2020-04-01-preview"
+                            
+                            $tryCounter = 0
+                            do {
+                                $result = "letscheck"
+                                $tryCounter++
+                                try {
+                                    $subResourceLocksResult = Invoke-RestMethod -Uri $uriSubResourceLocks -Method Get -Headers @{"Authorization" = "Bearer $accesstoken" }
+                                }
+                                catch {
+                                    $result = ($_.ErrorDetails.Message | ConvertFrom-Json).error.code
+                                }
+                                if ($result -ne "letscheck"){
+                                    $result
+                                    if ($result -eq "GatewayTimeout" -or $result -eq "BadGatewayConnection" -or $result -eq "InvalidGatewayHost") {
+                                        Write-Host " CustomDataCollection: Subscription Id: $childMgSubId Getting Resource Locks: try #$tryCounter; returned: '$result' - try again"
+                                        $result = "tryAgain"
+                                        Start-Sleep -Milliseconds 250
+                                    }
+                                }
+                            }
+                            until($result -ne "tryAgain")
+
+                            if ($result -ne "letscheck"){
+                                Write-Host " CustomDataCollection: Subscription Id: $childMgSubId Getting Resource Locks error: '$result' -> skipping Resource Locks for this subscription"
+                                $SubscriptionResourceLocks = "n/a"
+                            }
+                            else{
+                                if (($subResourceLocksResult.value | measure-object).count -gt 0) {
+                                    $SubscriptionResourceLocks = "$($subResourceLocksResult.value.properties.score.current) of $($subResourceLocksResult.value.properties.score.max) points" 
+                                }
+                                else {
+                                    $SubscriptionResourceLocks = "n/a"
+                                }
+                            }
+                        }
+                        else{
+                            $SubscriptionResourceLocks = "excluded"
+                        }
+
                         #SubscriptionBlueprint
                         $uriSubBlueprintDefinitionScoped = "$(($htAzureEnvironmentRelatedUrls).($checkContext.Environment.Name).ResourceManagerUrl)/subscriptions/$childMgSubId/providers/Microsoft.Blueprint/blueprints?api-version=2018-11-01-preview"
 
@@ -1228,6 +1280,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                                     -SubscriptionQuotaId $subscriptionQuotaId `
                                     -SubscriptionState $subscriptionState `
                                     -SubscriptionASCSecureScore $subscriptionASCSecureScore `
+                                    -SubscriptionResourceLocks $SubscriptionResourceLocks `
                                     -SubscriptionTags $subscriptionTags `
                                     -SubscriptionTagsLimit $LimitTagsSubscription `
                                     -SubscriptionTagsCount $SubscriptionTagsCount `
@@ -1321,6 +1374,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                                     -SubscriptionQuotaId $subscriptionQuotaId `
                                     -SubscriptionState $subscriptionState `
                                     -SubscriptionASCSecureScore $subscriptionASCSecureScore `
+                                    -SubscriptionResourceLocks $SubscriptionResourceLocks `
                                     -SubscriptionTags $subscriptionTags `
                                     -SubscriptionTagsLimit $LimitTagsSubscription `
                                     -SubscriptionTagsCount $SubscriptionTagsCount `
@@ -1527,6 +1581,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                                         -SubscriptionQuotaId $subscriptionQuotaId `
                                         -SubscriptionState $subscriptionState `
                                         -SubscriptionASCSecureScore $subscriptionASCSecureScore `
+                                        -SubscriptionResourceLocks $subscriptionResourceLocks `
                                         -SubscriptionTags $subscriptionTags `
                                         -SubscriptionTagsLimit $LimitTagsSubscription `
                                         -SubscriptionTagsCount $SubscriptionTagsCount `
@@ -1596,6 +1651,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                                         -SubscriptionQuotaId $subscriptionQuotaId `
                                         -SubscriptionState $subscriptionState `
                                         -SubscriptionASCSecureScore $subscriptionASCSecureScore `
+                                        -SubscriptionResourceLocks $subscriptionResourceLocks `
                                         -SubscriptionTags $subscriptionTags `
                                         -SubscriptionTagsLimit $LimitTagsSubscription `
                                         -SubscriptionTagsCount $SubscriptionTagsCount `
@@ -1768,6 +1824,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                                 -SubscriptionQuotaId $subscriptionQuotaId `
                                 -SubscriptionState $subscriptionState `
                                 -SubscriptionASCSecureScore $subscriptionASCSecureScore `
+                                -SubscriptionResourceLocks $subscriptionResourceLocks `
                                 -SubscriptionTags $subscriptionTags `
                                 -SubscriptionTagsLimit $LimitTagsSubscription `
                                 -SubscriptionTagsCount $SubscriptionTagsCount `
@@ -2138,6 +2195,7 @@ if ($mgOrSub -eq "sub"){
         $SubscriptionResourceGroupsCount = 0
     }
     $subscriptionASCPoints = ($subscriptionDetailsReleatedQuery).SubscriptionASCSecureScore | Get-Unique
+    $subscriptionResourceLocksCount = ($subscriptionDetailsReleatedQuery).SubscriptionResourceLocks | Get-Unique
     $resourcesSubscription = $resourcesAll | where-object { $_.subscriptionId -eq $subscriptionId } | Sort-Object -Property type, location
     $resourcesSubscriptionTotal = 0
     $resourcesSubscription.count_ | ForEach-Object { $resourcesSubscriptionTotal += $_ }
@@ -2154,6 +2212,14 @@ $htmlScopeInsights += @"
 </td></tr>
 <tr><td class="detailstd"><p>QuotaId: $subscriptionQuotaId</p></td></tr>
 <tr><td class="detailstd"><p><i class="fa fa-shield" aria-hidden="true"></i> ASC Secure Score: $subscriptionASCPoints</p></td></tr>
+<tr><td class="detailstd">
+"@
+
+$htmlScopeInsights += @"
+<p>State: $subscriptionState</p>
+</td></tr>
+<tr><td class="detailstd"><p>QuotaId: $subscriptionQuotaId</p></td></tr>
+<tr><td class="detailstd"><p><i class="fa fa-shield" aria-hidden="true"></i> Resource Lock Count: $subscriptionResourceLocksCount</p></td></tr>
 <tr><td class="detailstd">
 "@
 
@@ -8470,6 +8536,13 @@ if (-not $HierarchyMapOnly) {
     }
     else{
         Write-Host " ASC Secure Score for Subscriptions enabled - use parameter -NoASCSecureScore to disable"
+    }
+
+    if ($NoResourceLocks){
+        Write-Host " Getting Resource Locks for Subscriptions disabled"
+    }
+    else{
+        Write-Host " Getting Resource Locks for Subscriptions enabled - use parameter -NoResourceLocks to disable"
     }
 
     if ($NoResourceProvidersDetailed){

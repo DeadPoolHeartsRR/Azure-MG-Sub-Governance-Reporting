@@ -2249,13 +2249,97 @@ $htmlScopeInsights += @"
 <tr><td class="detailstd">
 "@
 
+if (-not $NoResourceLocks){
+    #ResourceLocks
+    #region ScopeInsightsResourceLocksDetailed
+    if (($htResourceLocksAll.Value | Measure-Object).count -gt 0){
+        $tfCount = ($arrayResourceLocksAll | Measure-Object).Count
+        $tableId = "DetailsTable_ResourceLocks_$($subscriptionId -replace '-','_')"
+        
 $htmlScopeInsights += @"
-<p>State: $subscriptionState</p>
+<button type="button" class="collapsible"><i class="fa fa-check-circle blue" aria-hidden="true"></i> <span class="valignMiddle">Resource Locks Detailed</span></button>
+<div class="content">
+<table id="$tableId" class="$cssClass">
+<thead>
+<tr>
+<th>ResourceLockName</th>
+<th>ResourceName</th>
+<th>Properties</th>
+</tr>
+</thead>
+<tbody>
+"@
+    
+    $htmlScopeInsightsResourceLocksDetailed = $null
+    
+    
+    foreach ($resourcelocks in ($htResourceLocksAll).($subscriptionId).Provider){
+$htmlScopeInsightsResourceLocksDetailed += @"
+<tr>
+<td>$($resourcelocks.Name)</td>
+<td>$($resourcelocks.ResourceName)</td>
+<td>$($resourcelocks.properties.level)</td>
+</tr>
+"@ 
+    }
+    $htmlScopeInsights += $htmlScopeInsightsResourceLocksDetailed
+$htmlScopeInsights += @"
+</tbody>
+</table>
+</div>
+<script>
+var tfConfig4$tableId = {
+base_path: 'https://www.azadvertizer.net/azgovvizv4/tablefilter/', rows_counter: true,          
+"@      
+    if ($tfCount -gt 10){
+        $spectrum = "10, $tfCount"
+        if ($tfCount -gt 100){
+            $spectrum = "10, 30, 50, $tfCount"
+        }
+        if ($tfCount -gt 500){
+            $spectrum = "10, 30, 50, 100, 250, $tfCount"
+        }
+        if ($tfCount -gt 1000){
+            $spectrum = "10, 30, 50, 100, 250, 500, 750, $tfCount"
+        }
+        if ($tfCount -gt 2000){
+            $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, $tfCount"
+        }
+        if ($tfCount -gt 3000){
+            $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, 3000, $tfCount"
+        }    
+$htmlScopeInsights += @"
+paging: {results_per_page: ['Records: ', [$spectrum]]},state: {types: ['local_storage'], filters: true, page_number: true, page_length: true, sort: true},
+"@
+    }
+    
+$htmlScopeInsights += @"
+btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { delay: 1100 }, no_results_message: true,
+col_1: 'select',
+col_types: [
+'caseinsensitivestring',
+'caseinsensitivestring',
+'caseinsensitivestring'
+],
+extensions: [{ name: 'sort' }]
+};
+var tf = new TableFilter('$tableId', tfConfig4$tableId);
+tf.init();
+</script>
+"@
+    }
+    else{
+$htmlScopeInsights += @"
+<p><i class="fa fa-ban" aria-hidden="true"></i> <span class="valignMiddle">$(($htResourceLocksAll.Value | Measure-Object).count) Resource Locks</span></p>
+"@
+    }
+$htmlScopeInsights += @"
 </td></tr>
-<tr><td class="detailstd"><p>QuotaId: $subscriptionQuotaId</p></td></tr>
-<tr><td class="detailstd"><p><i class="fa fa-shield" aria-hidden="true"></i> Resource Lock Count: $subscriptionResourceLocksCount</p></td></tr>
 <tr><td class="detailstd">
 "@
+
+    #endregion ScopeInsightsResourceLocksDetailed
+}  
 
 if (-not $NoResourceProvidersDetailed){
 #ResourceProvider

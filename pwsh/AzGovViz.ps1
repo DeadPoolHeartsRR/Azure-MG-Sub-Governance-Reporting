@@ -1221,7 +1221,41 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                             }
                             else{
                                 if (($subResourceLocksResult.value | measure-object).count -gt 0) {
-                                    $SubscriptionResourceLocks = "$($subResourceLocksResult)" 
+                                    #$SubscriptionResourceLocks = "$($subResourceLocksResult)" 
+                                    foreach ($resourcelock in $subResourceLocksResult.value) {
+
+                                        if (-not $($htCacheDefinitions).resourcelock[$resourcelock.LockId]) {
+                                            $($htCacheDefinitions).resourcelock.$($resoucelock.LockId) = @{ }
+                                            $($htCacheDefinitions).resourcelock.$($resourcelock.LockId) = $resourcelock
+                                        }  
+        
+                                        $resourcelockName = $resourcelock.Name
+                                        $resourcelockId = $resourcelock.LockId
+                                        $resourcelockResourceName = $resourcelock.ResourceName
+                                        $resourcelockProperties = $resourcelock.Properties
+                                        $resourcelockScoped = "/subscriptions/$childMgSubId"
+                                        addRowToTable `
+                                            -hierarchyLevel $hierarchyLevel `
+                                            -mgName $getMg.DisplayName `
+                                            -mgId $getMg.Name `
+                                            -mgParentId $mgParentId `
+                                            -mgParentName $mgParentName `
+                                            -Subscription $childMg.DisplayName `
+                                            -SubscriptionId $childMgSubId `
+                                            -SubscriptionQuotaId $subscriptionQuotaId `
+                                            -SubscriptionState $subscriptionState `
+                                            -SubscriptionASCSecureScore $subscriptionASCSecureScore `
+                                            -SubscriptionResourceLocks $SubscriptionResourceLocks `
+                                            -SubscriptionTags $subscriptionTags `
+                                            -SubscriptionTagsLimit $LimitTagsSubscription `
+                                            -SubscriptionTagsCount $SubscriptionTagsCount `
+                                            -resourcelockName $resourcelockName `
+                                            -resourcelockId $resourcelockId `
+                                            -resourcelockResourceName $resourcelockResourceName `
+                                            -resourcelockProperties $resourcelockProperties `
+                                            -resourcelockScoped $resourcelockScoped
+                                    }
+                                }
                                 }
                                 else {
                                     $SubscriptionResourceLocks = "n/a"

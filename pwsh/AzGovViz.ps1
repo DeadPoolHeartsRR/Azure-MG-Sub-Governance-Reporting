@@ -1192,7 +1192,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
 
                         #SubscriptionResourceLocks
                         if (-not $NoResourceLocks){
-                            $uriSubResourceLocks = "$(($htAzureEnvironmentRelatedUrls).($checkContext.Environment.Name).ResourceManagerUrl)subscriptions/$childMgSubId/providers/Microsoft.Authorization/locks?api-version=2020-04-01-preview"
+                            $uriSubResourceLocks = "$(($htAzureEnvironmentRelatedUrls).($checkContext.Environment.Name).ResourceManagerUrl)subscriptions/$childMgSubId/providers/Microsoft.Authorization/locks?api-version=2016-09-01"
                             
                             $tryCounter = 0
                             do {

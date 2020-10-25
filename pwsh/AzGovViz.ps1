@@ -1225,7 +1225,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                                     foreach ($resourcelock in $subResourceLocksResult) {
 
                                         if (-not $($htCacheDefinitions).resourcelock[$resourcelock.LockId]) {
-                                            $($htCacheDefinitions).resourcelock.$($resoucelock.LockId) = @{ }
+                                            $($htCacheDefinitions).resourcelock.$($resourcelock.LockId) = @{ }
                                             $($htCacheDefinitions).resourcelock.$($resourcelock.LockId) = $resourcelock
                                         }  
         

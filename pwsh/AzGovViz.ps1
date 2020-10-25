@@ -1200,6 +1200,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                                 $tryCounter++
                                 try {
                                     $subResourceLocksResult = Invoke-RestMethod -Uri $uriSubResourceLocks -Method Get -Headers @{"Authorization" = "Bearer $accesstoken" }
+                                    Write-Host $subResourceLocksResult
                                 }
                                 catch {
                                     $result = ($_.ErrorDetails.Message | ConvertFrom-Json).error.code

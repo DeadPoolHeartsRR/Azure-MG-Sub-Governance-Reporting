@@ -1221,7 +1221,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                             }
                             else{
                                 if (($subResourceLocksResult.value | measure-object).count -gt 0) {
-                                    $SubscriptionResourceLocks = "$($subResourceLocksResult.value.properties.score.current) of $($subResourceLocksResult.value.properties.score.max) points" 
+                                    $SubscriptionResourceLocks = "$($subResourceLocksResult.properties)" 
                                 }
                                 else {
                                     $SubscriptionResourceLocks = "n/a"

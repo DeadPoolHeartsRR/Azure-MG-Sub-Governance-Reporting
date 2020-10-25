@@ -1256,7 +1256,7 @@ function dataCollection($mgId, $hierarchyLevel, $mgParentId, $mgParentName) {
                                             -resourcelockScoped $resourcelockScoped
                                     }
                                 }
-                                }
+                                
                                 else {
                                     $SubscriptionResourceLocks = "n/a"
                                 }
